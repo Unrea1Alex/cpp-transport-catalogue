@@ -16,9 +16,9 @@ namespace catalogue
 
             StatReader(const TransportCatalogue& catalogue) : catalogue_(catalogue){};
 
-            void ReadQueries();
+            void ReadQueries(std::istream& stream);
 
-            void PrintInfo() const;
+            void PrintInfo(std::ostream& stream) const;
 
         private:
 
@@ -26,9 +26,9 @@ namespace catalogue
 
             std::string GetStopInfo(std::string stop_name) const;
 
-            void PrintRouteInfo(std::string route_name) const;
+            void PrintRouteInfo(std::string route_name, std::ostream& stream) const;
 
-            void PrintStopInfo(std::string route_name) const;
+            void PrintStopInfo(std::string route_name, std::ostream& stream) const;
 
             std::vector<std::string> queries;
 

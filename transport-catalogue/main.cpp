@@ -13,13 +13,13 @@ int main()
 
     catalogue::input::InputReader reader;
 
-    reader.ReadQueries();
+    reader.ReadQueries(std::cin);
 
     reader.FillCatalogueData(catalogue);
 
     catalogue::stat::StatReader stat_reader(catalogue);
 
-    stat_reader.ReadQueries();
+    stat_reader.ReadQueries(std::cin);
 
-    stat_reader.PrintInfo();
+    stat_reader.PrintInfo(std::cout);
 }

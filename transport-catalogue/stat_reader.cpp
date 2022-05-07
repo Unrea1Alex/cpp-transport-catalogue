@@ -2,6 +2,7 @@
 #include <sstream>
 #include "input_reader.h"
 #include "stat_reader.h"
+#include "geo.h"
 
 using namespace catalogue::stat::detail;
 using namespace catalogue::input::detail;
@@ -10,19 +11,19 @@ namespace catalogue
 {
     namespace stat
     {
-        void StatReader::ReadQueries()
+        void StatReader::ReadQueries(std::istream& stream)
         {
             int count = 0;
 
-            std::cin >> count;
+            stream >> count;
 
             std::string str;
 
-            std::getline(std::cin, str);
+            std::getline(stream, str);
 
             for(int i = 0; i < count; i++)
             {
-                std::getline(std::cin, str);
+                std::getline(stream, str);
 
                 queries.push_back(str);
             }
@@ -70,9 +71,9 @@ namespace catalogue
             return ss.str();
         }
 
-        void StatReader::PrintRouteInfo(std::string route_name) const
+        void StatReader::PrintRouteInfo(std::string route_name, std::ostream& stream) const
         {
-            std::cout << GetRouteInfo(route_name) << std::endl;
+            stream << GetRouteInfo(route_name) << std::endl;
         }
 
         std::string StatReader::GetStopInfo(std::string stop_name) const
@@ -109,22 +110,22 @@ namespace catalogue
             return ss.str();
         }
 
-        void StatReader::PrintStopInfo(std::string stop_name) const
+        void StatReader::PrintStopInfo(std::string stop_name, std::ostream& stream) const
         {
-            std::cout << GetStopInfo(stop_name) << std::endl;
+            stream << GetStopInfo(stop_name) << std::endl;
         }
 
-        void StatReader::PrintInfo() const
+        void StatReader::PrintInfo(std::ostream& stream) const
         {
             for(const auto str : queries)
             {
                 if(ToLower(str.substr(0, str.find(' '))) == "bus")
                 {
-                    PrintRouteInfo(trim(str.substr(4)));
+                    PrintRouteInfo(trim(str.substr(4)), stream);
                 }
                 else
                 {
-                    PrintStopInfo(trim(str.substr(5)));
+                    PrintStopInfo(trim(str.substr(5)), stream);
                 }
             }
         }

@@ -10,19 +10,19 @@ namespace catalogue
 {
     namespace input
     {
-        void InputReader::ReadQueries()
+        void InputReader::ReadQueries(std::istream& stream)
         {
             int count = 0;
 
-            std::cin >> count;
+            stream >> count;
 
             std::string str;
-            std::getline(std::cin, str);
+            std::getline(stream, str);
 
             for(int i = 0; i < count; i++)
             {
-                std::cin.precision(6);
-                std::getline(std::cin, str);
+                stream.precision(6);
+                std::getline(stream, str);
 
                 if(ToLower(str.substr(0, str.find(' '))) == "bus")
                 {

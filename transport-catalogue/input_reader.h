@@ -18,7 +18,7 @@ namespace catalogue
         {
         public:
 
-            void ReadQueries();
+            void ReadQueries(std::istream& stream);
 
             void FillCatalogueData(TransportCatalogue& catalogue);
 

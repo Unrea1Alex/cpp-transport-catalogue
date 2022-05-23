@@ -3,7 +3,7 @@
 
 namespace catalogue
 {
-    Stop* TransportCatalogue::AddStop(const std::string& name, const Coordinates& coordinates)
+    Stop* TransportCatalogue::AddStop(const std::string& name, const geo::Coordinates& coordinates)
     {
         Stop* stop = &stops.emplace_back(std::move(name), std::move(coordinates));
 
@@ -18,13 +18,13 @@ namespace catalogue
 
         if(stop_ptr)
         {
-            for(const auto& distance : distances)
+            for(const auto& [name, distance] : distances)
             {
-                auto next_stop_ptr = FindStopPtr(distance.first);
+                auto next_stop_ptr = FindStopPtr(name);
 
                 if(next_stop_ptr)
                 {
-                    stop_distances_[{stop_ptr, next_stop_ptr}] = distance.second;
+                    stop_distances_[{stop_ptr, next_stop_ptr}] = distance;
                 }
             }
         }
@@ -146,5 +146,36 @@ namespace catalogue
         }
 
         return 0;
+    }
+
+    std::vector<std::string_view> TransportCatalogue::GetBuses() const
+    {
+        std::vector<std::string_view> result(buses_.size());
+
+        std::transform(buses_.begin(), buses_.end(), result.begin(), [](const auto& str)
+        {
+            return std::string_view(str);
+        });
+        return result;
+    }
+
+    std::vector<const Stop*>&& TransportCatalogue::GetStopsIndex() const
+    {
+        static std::vector<const Stop*> stops;
+
+        for(const auto [name, stop] : stops_index_)
+        {
+            if(stop_to_routes_index_.count(stop))
+            {
+                stops.push_back(stop);
+            }
+        }
+
+        return std::move(stops);
+    }
+
+    const std::unordered_map<std::string_view, Route*> TransportCatalogue::GetRouteIndex() const
+    {
+        return routes_index;
     }
 }

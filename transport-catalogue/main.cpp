@@ -1,25 +1,43 @@
 #include <iostream>
-#include "input_reader.h"
-#include "stat_reader.h"
+#include <sstream>
+#include <fstream>
+#include "json_reader.h"
+#include "request_handler.h"
 #include "transport_catalogue.h"
-//#include "tests.h"
+#include "map_renderer.h"
 
-int main()
+#include <filesystem>
+
+
+using namespace catalogue;
+using namespace catalogue::input;
+using namespace catalogue::output;
+using namespace catalogue::requests;
+
+using std::filesystem::current_path;
+
+int main() 
 {
-    //TestRouteStops();
-    //TestStopsRoutes();
+    TransportCatalogue catalogue;    
 
-    catalogue::TransportCatalogue catalogue;
+    //std::fstream fs(current_path().string() + "/map_test.json");
+    //JsonReader jr(fs);
 
-    catalogue::input::InputReader reader;
+    //fs.close();
 
-    reader.ReadQueries(std::cin);
+    JsonReader jr(std::cin);
 
-    reader.FillCatalogueData(catalogue);
+    RequestHandler rh(catalogue);
 
-    catalogue::stat::StatReader stat_reader(catalogue);
+    rh.FillCatalogueFromJson(jr);
 
-    stat_reader.ReadQueries(std::cin);
+    //std::fstream fs_out(current_path().string() + "/map_test_out.json");
 
-    stat_reader.PrintInfo(std::cout);
+    //rh.RenderMap(jr, fs_out);
+
+    //fs_out.close();
+
+    rh.PrintResponse(jr, std::cout);
+
+    //std::cout << "1";
 }

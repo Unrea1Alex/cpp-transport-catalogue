@@ -3,13 +3,12 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include <vector>
 #include <variant>
+#include <vector>
 
-namespace json
+namespace json 
 {
     class Node;
-
     using Dict = std::map<std::string, Node>;
     using Array = std::vector<Node>;
 
@@ -19,64 +18,179 @@ namespace json
         using runtime_error::runtime_error;
     };
 
-    using Value = std::variant<std::nullptr_t, int, double, std::string, bool, Array, Dict>;
-
-    class Node 
+    class Node final : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> 
     {
     public:
+        using variant::variant;
+        using Value = variant;
 
-        Node();
-        Node(Array array);
-        Node(Dict map);
-        Node(int value);
-        Node(double value);
-        Node(std::string value);
-        Node(bool value);
-        Node(std::nullptr_t value);
+        bool IsInt() const 
+        {
+            return std::holds_alternative<int>(*this);
+        }
 
-        int AsInt() const;
-        bool AsBool() const;
-        double AsDouble() const; 
-        const std::string& AsString() const;
-        const Array& AsArray() const;
-        const Dict& AsMap() const;
+        int AsInt() const 
+        {
+            using namespace std::literals;
+            if (!IsInt()) 
+            {
+                throw std::logic_error("Not an int"s);
+            }
+            return std::get<int>(*this);
+        }
 
-        inline bool IsInt() const { return value_.index() == 1; }
-        inline bool IsDouble() const { return value_.index() == 2 || value_.index() == 1; }
-        inline bool IsPureDouble() const { return value_.index() == 2; }
-        inline bool IsBool() const { return value_.index() == 4; }
-        inline bool IsString() const { return value_.index() == 3; }
-        inline bool IsNull() const { return value_.index() == 0; }
-        inline bool IsArray() const { return value_.index() == 5; }
-        inline bool IsMap() const { return value_.index() == 6; }
+        bool IsPureDouble() const 
+        {
+            return std::holds_alternative<double>(*this);
+        }
 
-        Value GetValue() const;
+        bool IsDouble() const 
+        {
+            return IsInt() || IsPureDouble();
+        }
 
-        bool operator==(const Node& other) const;
+        double AsDouble() const 
+        {
+            using namespace std::literals;
+            if (!IsDouble()) 
+            {
+                throw std::logic_error("Not a double"s);
+            }
+            return IsPureDouble() ? std::get<double>(*this) : AsInt();
+        }
 
-        bool operator!=(const Node& other) const;
+        bool IsBool() const 
+        {
+            return std::holds_alternative<bool>(*this);
+        }
 
-    private:
+        bool AsBool() const 
+        {
+            using namespace std::literals;
+            if (!IsBool()) 
+            {
+                throw std::logic_error("Not a bool"s);
+            }
+            return std::get<bool>(*this);
+        }
 
-        Value value_;
+        bool IsNull() const 
+        {
+            return std::holds_alternative<std::nullptr_t>(*this);
+        }
+
+        bool IsArray() const 
+        {
+            return std::holds_alternative<Array>(*this);
+        }
+
+        const Array& AsArray() const 
+        {
+            using namespace std::literals;
+            if (!IsArray()) 
+            {
+                throw std::logic_error("Not an array"s);
+            }
+
+            return std::get<Array>(*this);
+        }
+
+        Array& AsArray() 
+        {
+            using namespace std::literals;
+            if (!IsArray()) 
+            {
+                throw std::logic_error("Not an array"s);
+            }
+
+            return std::get<Array>(*this);
+        }
+
+        bool IsString() const 
+        {
+            return std::holds_alternative<std::string>(*this);
+        }
+
+        const std::string& AsString() const 
+        {
+            using namespace std::literals;
+            if (!IsString()) 
+            {
+                throw std::logic_error("Not a string"s);
+            }
+
+            return std::get<std::string>(*this);
+        }
+
+        bool IsDict() const 
+        {
+            return std::holds_alternative<Dict>(*this);
+        }
+
+        const Dict& AsDict() const 
+        {
+            using namespace std::literals;
+            if (!IsDict()) 
+            {
+                throw std::logic_error("Not a dict"s);
+            }
+
+            return std::get<Dict>(*this);
+        }
+
+        Dict& AsDict() 
+        {
+            using namespace std::literals;
+            if (!IsDict()) 
+            {
+                throw std::logic_error("Not a dict"s);
+            }
+
+            return std::get<Dict>(*this);
+        }
+
+        bool operator==(const Node& rhs) const 
+        {
+            return GetValue() == rhs.GetValue();
+        }
+
+        const Value& GetValue() const 
+        {
+            return *this;
+        }
     };
+
+    inline bool operator!=(const Node& lhs, const Node& rhs) 
+    {
+        return !(lhs == rhs);
+    }
 
     class Document 
     {
     public:
+        Document(Node root) : root_(std::move(root)) { }
 
-        Document(Node root);
-        Document(Array arr);
-
-        const Node& GetRoot() const;
-
-        void ParseTokens(std::istream& stream);
-
-        bool operator==(const Document& other) const;
-        bool operator!=(const Document& other) const;
+        const Node& GetRoot() const 
+        {
+            return root_;
+        }
 
     private:
-
         Node root_;
     };
-}  
+
+    inline bool operator==(const Document& lhs, const Document& rhs) 
+    {
+        return lhs.GetRoot() == rhs.GetRoot();
+    }
+
+    inline bool operator!=(const Document& lhs, const Document& rhs) 
+    {
+        return !(lhs == rhs);
+    }
+
+    Document Load(std::istream& input);
+
+    void Print(const Document& doc, std::ostream& output);
+
+}  // namespace json

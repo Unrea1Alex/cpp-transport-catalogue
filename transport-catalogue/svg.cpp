@@ -4,8 +4,15 @@
 
 namespace svg 
 {
-
     using namespace std::literals;
+
+    void RenderContext::RenderIndent() const 
+    {
+        for (int i = 0; i < indent; ++i) 
+        {
+            out.put(' ');
+        }
+    }
 
     void Object::Render(const RenderContext& context) const 
     {
@@ -48,9 +55,7 @@ namespace svg
     {
         auto& out = context.out;
         out << "<polyline points="sv;
-
         out << points_;
-
         out << " "sv;
 
         RenderAttrs(context);
@@ -108,7 +113,6 @@ namespace svg
 
             result += c;
         }
-
         return result;
     }
 
@@ -136,9 +140,7 @@ namespace svg
         RenderAttrs(context);
 
         out << ">"sv;
-        
         out << ClearData();
-        
         out << "</text>"sv;
     }
 
@@ -153,7 +155,6 @@ namespace svg
 
         out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>"sv << std::endl;
         out << "<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">"sv << std::endl;
-
         out.precision(6);
 
         for(const auto& obj : objects_)
@@ -234,7 +235,6 @@ namespace svg
                 stream << "butt"sv;
                 break;
             }
-
         return stream;
     }
 
@@ -266,7 +266,6 @@ namespace svg
                 stream << "miter"sv;
                 break;
             }
-
             return stream;
     }
 
@@ -279,5 +278,4 @@ namespace svg
 
         return stream;
     }
-
 }

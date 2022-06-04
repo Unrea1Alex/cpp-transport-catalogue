@@ -26,7 +26,6 @@ namespace catalogue
                     throw ParsingError("false token error");
                 }
             }
-
             return true;
         }
 
@@ -83,7 +82,6 @@ namespace catalogue
                     throw ParsingError("error symbol");
                     break;
             }
-
             return Node();
         }
 
@@ -104,7 +102,6 @@ namespace catalogue
                 {
                     in.putback(c);
                 }
-
                 result.push_back(std::move(LoadNode(in)));
             }
 
@@ -112,7 +109,6 @@ namespace catalogue
             {
                 throw ParsingError("eof");
             }
-
             return Node(move(result));
         }
 
@@ -143,7 +139,6 @@ namespace catalogue
             {
                 return Node(std::stod(res));
             }
-
             return Node(std::stoi(res));
         }
 
@@ -203,7 +198,6 @@ namespace catalogue
                     throw ParsingError("eof");
                 }
             }
-
             return {std::move(line)};
         }
 
@@ -249,12 +243,12 @@ namespace catalogue
         {
             static RenderSetup result;
 
-            if(!document_.GetRoot().AsMap().count("render_settings"))
+            if(!document_.GetRoot().AsDict().count("render_settings"))
             {
                 return std::move(result);
             }
             
-            Dict render_settings = document_.GetRoot().AsMap().at("render_settings").AsMap();
+            Dict render_settings = document_.GetRoot().AsDict().at("render_settings").AsDict();
 
             result.width = render_settings.at("width").AsDouble();
             result.height = render_settings.at("height").AsDouble();
@@ -321,7 +315,6 @@ namespace catalogue
             }
 
             output << "]";
-
         }
     
         void JsonWriter::Print(Dict value, std::ostream& output)
@@ -351,7 +344,6 @@ namespace catalogue
             }
 
             output << "}";
-            
         }
 
         void JsonWriter::Print(std::nullptr_t, std::ostream& output)
@@ -415,7 +407,6 @@ namespace catalogue
         std::string ToLower(std::string&& str)
         {
             std::transform(str.begin(), str.end(), str.begin(),[](unsigned char c) { return std::tolower(c); });
-
             return str;
         }
 
@@ -457,7 +448,6 @@ namespace catalogue
                     tmp  = svg::Rgba(color[0].AsInt(), color[1].AsInt(), color[2].AsInt(), color[3].AsDouble());
                 }
             }
-
             return tmp;
         }
     }

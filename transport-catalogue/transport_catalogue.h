@@ -32,7 +32,7 @@ namespace catalogue
         int GetDistance(const Stop* stop1, const Stop* stop2) const;
 
         std::vector<const Stop*>&& GetStopsIndex() const;
-
+        
         std::vector<std::string_view> GetBuses() const;
 
         template<typename T>
@@ -43,9 +43,7 @@ namespace catalogue
     private:
 
         std::string* AddBus(const std::string&& name);
-
         void UpdateStopIndex(const Stop* stop_ptr, std::string* route_name_ptr);
-
         Route* MakeRoute(const std::vector<std::string>&& stop_names, bool is_circular);
 
         std::deque<Stop> stops;

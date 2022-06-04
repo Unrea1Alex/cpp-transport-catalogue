@@ -19,10 +19,8 @@ namespace catalogue
                 {
                     id++;
                 }
-
                 return color_palette[old_id];
             }
-
             throw std::invalid_argument("invalid color palette id");
         }
 

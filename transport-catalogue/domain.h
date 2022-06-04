@@ -14,15 +14,12 @@ namespace domain
 
         Stop(std::string name, geo::Coordinates coordinates) : name_(name), coordinates_(coordinates){}
 
-        bool operator==(const Stop& other) const
-        {
-            return other.name_ == name_;
-        }
+        bool operator==(const Stop& other) const;
     };
 
     struct Route
     {
-        Route(std::vector<const Stop*> stops, bool is_circular) : stops_(std::move(stops)), is_circular_(is_circular) {}
+        Route(std::vector<const Stop*> stops, bool is_circular);
         std::vector<const Stop*> stops_;
         bool is_circular_;
     };
@@ -106,5 +103,5 @@ namespace domain
         {
             zoom_coeff_ = *height_zoom;
         }
-    };
+    }
 }

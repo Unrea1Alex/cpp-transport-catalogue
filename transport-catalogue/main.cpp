@@ -20,12 +20,12 @@ int main()
 {
     TransportCatalogue catalogue;    
 
-    //std::fstream fs(current_path().string() + "/map_test.json");
-    //JsonReader jr(fs);
+    std::fstream fs(current_path().string() + "/s10_final_opentest_2.json");
+    JsonReader jr(fs);
 
-    //fs.close();
+    fs.close();
 
-    JsonReader jr(std::cin);
+    //JsonReader jr(std::cin);
 
     RequestHandler rh(catalogue);
 
@@ -33,11 +33,13 @@ int main()
 
     //std::fstream fs_out(current_path().string() + "/map_test_out.json");
 
+    //rh.PrintResponse(jr, fs_out);
+
     //rh.RenderMap(jr, fs_out);
 
     //fs_out.close();
 
     rh.PrintResponse(jr, std::cout);
 
-    //std::cout << "1";
+    std::cout << "1";
 }

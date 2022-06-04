@@ -1,5 +1,6 @@
 #include <algorithm>
 #include "request_handler.h"
+#include "json_builder.h"
 #include "geo.h"
 
 using namespace catalogue::input;
@@ -15,23 +16,23 @@ namespace catalogue
         {
             Document doc = reader.Get();
 
-            Array base_requests = doc.GetRoot().AsMap().at("base_requests").AsArray();
+            Array base_requests = doc.GetRoot().AsDict().at("base_requests").AsArray();
 
             for(const auto& request : base_requests)
             {
-                if(request.AsMap().at("type").AsString() == "Stop")
+                if(request.AsDict().at("type").AsString() == "Stop")
                 {
-                    geo::Coordinates coord{request.AsMap().at("latitude").AsDouble(), request.AsMap().at("longitude").AsDouble()};
-                    catalogue_.AddStop(request.AsMap().at("name").AsString(), coord);
+                    geo::Coordinates coord{request.AsDict().at("latitude").AsDouble(), request.AsDict().at("longitude").AsDouble()};
+                    catalogue_.AddStop(request.AsDict().at("name").AsString(), coord);
                 }
             }
 
             for(const auto& request : base_requests)
             {
-                if(request.AsMap().at("type").AsString() == "Bus")
+                if(request.AsDict().at("type").AsString() == "Bus")
                 {
-                    std::string name = request.AsMap().at("name").AsString();
-                    Array stops = request.AsMap().at("stops").AsArray();
+                    std::string name = request.AsDict().at("name").AsString();
+                    Array stops = request.AsDict().at("stops").AsArray();
 
                     std::vector<std::string> stop_names(stops.size());
 
@@ -40,14 +41,14 @@ namespace catalogue
                         return node.AsString();
                     });
 
-                    bool is_circular = request.AsMap().at("is_roundtrip").AsBool();
+                    bool is_circular = request.AsDict().at("is_roundtrip").AsBool();
 
                     catalogue_.AddRoute(std::move(name), std::move(stop_names), is_circular);
                 }
                 else
                 {
-                    std::string name = request.AsMap().at("name").AsString();
-                    Dict json_distances = request.AsMap().at("road_distances").AsMap();
+                    std::string name = request.AsDict().at("name").AsString();
+                    Dict json_distances = request.AsDict().at("road_distances").AsDict();
 
                     std::vector<std::pair<std::string, int>> distances(json_distances.size());
 
@@ -67,13 +68,10 @@ namespace catalogue
 
             if(stops.empty())
             {
-                Dict res = Dict
-                {
-                    {"request_id"s, request_id},
-                    {"error_message"s, "not found"s},
-                };
-
-                return Node(res);
+                return Builder{}.StartDict()
+                                    .Key("request_id"s).Value(request_id)
+                                    .Key("error_message"s).Value("not found"s)
+                                .EndDict().Build();
             }
 
             long double geo_distance = 0;
@@ -81,7 +79,7 @@ namespace catalogue
 
             double curvature = 0.;
 
-            for(auto i = 0; i < stops.size() - 1; i++)
+            for(auto i = 0; i < (int)stops.size() - 1; i++)
             {
                 real_distance += catalogue_.GetDistance(stops[i], stops[i + 1]);
 
@@ -99,16 +97,13 @@ namespace catalogue
 
             int unique_stops = std::distance(stops.begin(), end);
 
-            Dict res = Dict
-            {
-                {"request_id"s, request_id},
-                {"curvature"s, curvature},
-                {"route_length"s, real_distance},
-                {"stop_count"s, (int)(stops.size())},
-                {"unique_stop_count"s, unique_stops},
-            };
-
-            return Node(res);
+            return Builder{}.StartDict()
+                                .Key("request_id"s).Value(request_id)
+                                .Key("curvature"s).Value(curvature)
+                                .Key("route_length"s).Value(real_distance)
+                                .Key("stop_count"s).Value((int)(stops.size()))
+                                .Key("unique_stop_count"s).Value(unique_stops)
+                            .EndDict().Build();
         }
 
         Node RequestHandler::GetBusesByStopJson(std::string stop_name, int request_id) const
@@ -117,13 +112,12 @@ namespace catalogue
 
             if(!routes.has_value())
             {
-                Dict res = Dict
-                {
-                    {"request_id"s, request_id},
-                    {"error_message"s, "not found"s},
-                };
-
-                return Node(res);
+                return Builder{}.StartDict()
+                                    .Key("request_id"s)
+                                    .Value(request_id)
+                                    .Key("error_message"s)
+                                    .Value("not found"s)
+                                .EndDict().Build();
             }
 
             Array buses;
@@ -138,13 +132,12 @@ namespace catalogue
                 return lhs.AsString() < rhs.AsString();
             });
 
-            Dict res = Dict
-            {
-                {"request_id"s, request_id},
-                {"buses"s, buses},
-            };
-
-            return Node(res);
+            return Builder{}.StartDict()
+                                .Key("request_id"s)
+                                .Value(request_id)
+                                .Key("buses"s)
+                                .Value(buses)
+                            .EndDict().Build();
         }
 
         Node RequestHandler::GetMapJson(JsonReader reader, int request_id) const
@@ -152,40 +145,39 @@ namespace catalogue
             std::stringstream ss;
             
             RenderMap(reader, ss);
-            
-            Dict res = Dict
-            {
-                {"request_id"s, request_id},
-                {"Map"s, ss.str()},
-            };
 
-            return Node(res);
+            return Builder{}.StartDict()
+                                .Key("request_id"s)
+                                .Value(request_id)
+                                .Key("map"s)
+                                .Value(ss.str())
+                            .EndDict().Build();
         }
 
         void RequestHandler::PrintResponse(JsonReader reader, std::ostream& stream) const
         {
             Document doc = reader.Get();
 
-            Array stat_requests = doc.GetRoot().AsMap().at("stat_requests").AsArray();
+            Array stat_requests = doc.GetRoot().AsDict().at("stat_requests").AsArray();
 
             Array response_array;
 
             for(const auto& request : stat_requests)
             {
-                if(request.AsMap().at("type").AsString() == "Stop")
+                if(request.AsDict().at("type").AsString() == "Stop")
                 {
-                    response_array.push_back(GetBusesByStopJson(request.AsMap().at("name").AsString(), request.AsMap().at("id").AsInt()));
+                    response_array.push_back(GetBusesByStopJson(request.AsDict().at("name").AsString(), request.AsDict().at("id").AsInt()));
                     continue;
                 }
                 
-                if(request.AsMap().at("type").AsString() == "Bus")
+                if(request.AsDict().at("type").AsString() == "Bus")
                 {
-                    response_array.push_back(GetBusStatJson(request.AsMap().at("name").AsString(), request.AsMap().at("id").AsInt()));
+                    response_array.push_back(GetBusStatJson(request.AsDict().at("name").AsString(), request.AsDict().at("id").AsInt()));
                 }
 
-                if(request.AsMap().at("type").AsString() == "Map")
+                if(request.AsDict().at("type").AsString() == "Map")
                 {
-                    response_array.push_back(GetMapJson(reader, request.AsMap().at("id").AsInt()));
+                    response_array.push_back(GetMapJson(reader, request.AsDict().at("id").AsInt()));
                 }
             }
 

@@ -82,7 +82,7 @@ namespace catalogue
         {
             return;
         }
-
+        
         stop_to_routes_index_[stop_ptr].insert(route_name_ptr);
     }
 
@@ -94,7 +94,6 @@ namespace catalogue
         {
             return it->second->stops_;
         }
-
         return std::vector<const Stop*>();
     }
 
@@ -106,7 +105,6 @@ namespace catalogue
         {
             return it->second;
         }
-
         return nullptr;
     }
 
@@ -125,7 +123,6 @@ namespace catalogue
         {
             return std::optional<std::unordered_set<std::string*>>{found_it->second};
         }
-
         return std::optional<std::unordered_set<std::string*>>{std::unordered_set<std::string*>()};
     }
 
@@ -144,7 +141,6 @@ namespace catalogue
         {
             return it1->second;
         }
-
         return 0;
     }
 
@@ -170,7 +166,6 @@ namespace catalogue
                 stops.push_back(stop);
             }
         }
-
         return std::move(stops);
     }
 

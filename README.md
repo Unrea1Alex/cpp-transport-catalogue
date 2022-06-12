@@ -3,9 +3,9 @@ The project uses CMake build. When starting, you must specify an input file of t
 
 Building and Run
 
-mkdir BuildSearchEngine && cd BuildSearchEngine
+mkdir BuildTransportCatalogue && cd BuildTransportCatalogue
 cmake ..
 cmake --build .
-Start ./search_engine or search_engine.exe
+Start ./transport_catalogue or transport_catalogue.exe
 
 System requirements and Stack C++17 GCC version 8.1.0 Cmake 3.21.2 (minimal 3.10) JSON SVG
